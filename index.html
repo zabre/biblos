@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Biblos</title>
+  <meta name="description" content="Bibliothèque personnelle éditoriale, statique et synchronisable avec GitHub JSON." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&f[]=boska@400,500,700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar glass">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true"></div>
+        <div>
+          <p class="eyebrow">Bibliothèque</p>
+          <h1>Biblos</h1>
+        </div>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-link active" data-view="library">Mes étagères</button>
+        <button class="nav-link" data-view="carousel">Coverflow</button>
+        <button class="nav-link" data-view="settings">Paramètres</button>
+      </nav>
+
+      <div class="panel soft">
+        <label class="field-label" for="searchInput">Recherche</label>
+        <input id="searchInput" class="input" type="search" placeholder="Titre, auteur, genre..." />
+      </div>
+
+      <div class="panel soft stats">
+        <div>
+          <span class="stat-label">Livres</span>
+          <strong id="bookCount">0</strong>
+        </div>
+        <div>
+          <span class="stat-label">Étagères</span>
+          <strong id="shelfCount">0</strong>
+        </div>
+        <div>
+          <span class="stat-label">En cours</span>
+          <strong id="readingCount">0</strong>
+        </div>
+      </div>
+
+      <div class="panel soft action-stack">
+        <button id="openAddModal" class="btn btn-primary">Ajouter un livre</button>
+        <button id="exportJson" class="btn btn-secondary">Exporter JSON</button>
+        <button id="openGithubModal" class="btn btn-ghost">Synchroniser GitHub</button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar glass">
+        <div>
+          <p class="eyebrow">Collection personnelle</p>
+          <h2 class="page-title">Mes étagères</h2>
+        </div>
+        <div class="toolbar">
+          <select id="sortSelect" class="input input-select">
+            <option value="added-desc">Plus récents</option>
+            <option value="title-asc">Titre A-Z</option>
+            <option value="author-asc">Auteur A-Z</option>
+            <option value="shelf-asc">Étagère</option>
+          </select>
+          <select id="filterSelect" class="input input-select">
+            <option value="all">Tous les statuts</option>
+            <option value="read">Lus</option>
+            <option value="reading">En cours</option>
+            <option value="to-read">À lire</option>
+          </select>
+        </div>
+      </header>
+
+      <section id="libraryView" class="view active">
+        <div id="shelves" class="shelves"></div>
+      </section>
+
+      <section id="carouselView" class="view">
+        <div class="hero-stage glass">
+          <div class="hero-copy">
+            <p class="eyebrow">Sélection immersive</p>
+            <h3 id="carouselTitle">—</h3>
+            <p id="carouselMeta">—</p>
+            <p id="carouselNote" class="muted">Choisissez un livre pour afficher ses détails.</p>
+          </div>
+          <div class="carousel-wrap">
+            <button id="prevCarousel" class="carousel-arrow" aria-label="Précédent">‹</button>
+            <div id="carouselTrack" class="carousel-track"></div>
+            <button id="nextCarousel" class="carousel-arrow" aria-label="Suivant">›</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="settingsView" class="view">
+        <div class="settings-grid">
+          <article class="panel glass prose">
+            <p class="eyebrow">JSON</p>
+            <h3>Source des données</h3>
+            <p>Au chargement, l'application lit <code>books.json</code>. Vous pouvez aussi pousser la base vers un fichier JSON d'un repo GitHub via l'API Contents.</p>
+          </article>
+          <article class="panel glass prose">
+            <p class="eyebrow">Netlify</p>
+            <h3>Déploiement</h3>
+            <p>L'app est 100% statique : ouvrez ce dossier dans Netlify, ou connectez un repo GitHub. Aucun backend n'est requis.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <dialog id="bookModal" class="modal">
+    <form method="dialog" class="modal-card glass wide" id="bookForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Ajouter un livre</p>
+          <h3>Nouveau volume</h3>
+        </div>
+        <button class="icon-btn" value="cancel" aria-label="Fermer">×</button>
+      </div>
+      <div class="modal-grid">
+        <div class="field-row grow">
+          <label class="field-label" for="isbnInput">ISBN</label>
+          <div class="inline-field">
+            <input id="isbnInput" class="input" type="text" placeholder="9782070360024" />
+            <button type="button" id="lookupBtn" class="btn btn-secondary">Chercher</button>
+          </div>
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="titleInput">Titre</label>
+          <input id="titleInput" class="input" type="text" required />
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="authorInput">Auteur</label>
+          <input id="authorInput" class="input" type="text" required />
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="genreInput">Genre</label>
+          <input id="genreInput" class="input" type="text" placeholder="Roman" />
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="statusInput">Statut</label>
+          <select id="statusInput" class="input input-select">
+            <option value="to-read">À lire</option>
+            <option value="reading">En cours</option>
+            <option value="read">Lu</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="shelfInput">Étagère</label>
+          <input id="shelfInput" class="input" type="number" min="1" step="1" value="1" />
+        </div>
+        <div class="field-row field-span-2">
+          <label class="field-label" for="coverInput">Couverture</label>
+          <input id="coverInput" class="input" type="url" placeholder="https://..." />
+        </div>
+        <div class="field-row field-span-2">
+          <label class="field-label" for="noteInput">Note</label>
+          <textarea id="noteInput" class="input textarea" rows="4" placeholder="Quelques mots personnels..."></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="deleteBookBtn" class="btn btn-ghost hidden">Supprimer</button>
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="githubModal" class="modal">
+    <form method="dialog" class="modal-card glass" id="githubForm">
+      <div class="modal-head">
+        <div>
+          <p class="eyebrow">Synchronisation</p>
+          <h3>GitHub JSON</h3>
+        </div>
+        <button class="icon-btn" value="cancel" aria-label="Fermer">×</button>
+      </div>
+      <div class="modal-grid one-col">
+        <div class="field-row"><label class="field-label" for="ghOwner">Owner</label><input id="ghOwner" class="input" placeholder="zabre" /></div>
+        <div class="field-row"><label class="field-label" for="ghRepo">Repo</label><input id="ghRepo" class="input" placeholder="biblos" /></div>
+        <div class="field-row"><label class="field-label" for="ghPath">Chemin JSON</label><input id="ghPath" class="input" placeholder="books.json" value="books.json" /></div>
+        <div class="field-row"><label class="field-label" for="ghBranch">Branche</label><input id="ghBranch" class="input" placeholder="main" value="main" /></div>
+        <div class="field-row"><label class="field-label" for="ghToken">Token GitHub</label><input id="ghToken" class="input" type="password" placeholder="ghp_..." /></div>
+      </div>
+      <div class="modal-actions">
+        <button type="button" id="pushGithub" class="btn btn-primary">Pousser books.json</button>
+      </div>
+    </form>
+  </dialog>
+
+  <template id="bookCardTemplate">
+    <article class="book-card" tabindex="0">
+      <div class="book-spine"></div>
+      <img class="book-cover" alt="" loading="lazy" decoding="async" />
+      <div class="book-meta">
+        <h4 class="book-title"></h4>
+        <p class="book-author"></p>
+      </div>
+    </article>
+  </template>
+
+  <script src="./assets/app.js" defer></script>
+</body>
+</html>
