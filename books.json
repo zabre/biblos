@@ -1,0 +1,74 @@
+[
+  {
+    "id": "1",
+    "isbn": "9782070360024",
+    "title": "L'Étranger",
+    "author": "Albert Camus",
+    "cover": "https://covers.openlibrary.org/b/isbn/9782070360024-L.jpg",
+    "genre": "Roman",
+    "status": "read",
+    "shelf": 1,
+    "note": "Un livre sobre, sec et magnétique.",
+    "added": "2026-01-10"
+  },
+  {
+    "id": "2",
+    "isbn": "9782070413119",
+    "title": "Le Petit Prince",
+    "author": "Antoine de Saint-Exupéry",
+    "cover": "https://covers.openlibrary.org/b/isbn/9782070413119-L.jpg",
+    "genre": "Conte",
+    "status": "read",
+    "shelf": 1,
+    "note": "À relire régulièrement.",
+    "added": "2026-02-03"
+  },
+  {
+    "id": "3",
+    "isbn": "9782070360536",
+    "title": "La Peste",
+    "author": "Albert Camus",
+    "cover": "https://covers.openlibrary.org/b/isbn/9782070360536-L.jpg",
+    "genre": "Roman",
+    "status": "reading",
+    "shelf": 1,
+    "note": "Lecture en cours.",
+    "added": "2026-03-15"
+  },
+  {
+    "id": "4",
+    "isbn": "9782221252055",
+    "title": "Sapiens",
+    "author": "Yuval Noah Harari",
+    "cover": "https://covers.openlibrary.org/b/isbn/9782221252055-L.jpg",
+    "genre": "Essai",
+    "status": "read",
+    "shelf": 2,
+    "note": "Très structurant.",
+    "added": "2026-01-22"
+  },
+  {
+    "id": "5",
+    "isbn": "9782253004226",
+    "title": "Les Misérables",
+    "author": "Victor Hugo",
+    "cover": "https://covers.openlibrary.org/b/isbn/9782253004226-L.jpg",
+    "genre": "Roman",
+    "status": "to-read",
+    "shelf": 2,
+    "note": "À commencer bientôt.",
+    "added": "2026-04-01"
+  },
+  {
+    "id": "6",
+    "isbn": "9782266283038",
+    "title": "Dune",
+    "author": "Frank Herbert",
+    "cover": "https://covers.openlibrary.org/b/isbn/9782266283038-L.jpg",
+    "genre": "Science-Fiction",
+    "status": "reading",
+    "shelf": 2,
+    "note": "Dense et ample.",
+    "added": "2026-04-20"
+  }
+]
