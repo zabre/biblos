@@ -1,208 +1,218 @@
-<!doctype html>
-<html lang="fr">
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Biblos</title>
-  <meta name="description" content="Bibliothèque personnelle éditoriale, statique et synchronisable avec GitHub JSON." />
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://api.fontshare.com/v2/css?f[]=satoshi@300,400,500,700&f[]=boska@400,500,700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./assets/style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Biblos — Ma Bibliothèque</title>
+<link rel="preconnect" href="https://api.fontshare.com">
+<link href="https://api.fontshare.com/v2/css?f[]=boska@400,500,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./assets/style.css">
 </head>
 <body>
-  <div class="app-shell">
-    <aside class="sidebar glass">
-      <div class="brand">
-        <div class="brand-mark" aria-hidden="true"></div>
-        <div>
-          <p class="eyebrow">Bibliothèque</p>
-          <h1>Biblos</h1>
-        </div>
+<div class="app-shell">
+
+  <!-- ─ SIDEBAR ─────────────────────────────────────────────── -->
+  <aside class="sidebar glass">
+    <div class="brand">
+      <div class="brand-mark"></div>
+      <h1>Biblos</h1>
+    </div>
+
+    <nav class="nav" aria-label="Navigation principale">
+      <button class="nav-link active" data-view="library">📚 Étagères</button>
+      <button class="nav-link" data-view="carousel">🎬 Coverflow</button>
+      <button class="nav-link" data-view="settings">⚙️ Paramètres</button>
+    </nav>
+
+    <div class="panel soft" style="border-radius:20px;padding:20px;">
+      <p class="eyebrow" style="margin-bottom:12px;">Ma collection</p>
+      <div class="stats">
+        <div><span class="stat-label">Livres</span><strong id="bookCount">0</strong></div>
+        <div><span class="stat-label">Étagères</span><strong id="shelfCount">0</strong></div>
+        <div><span class="stat-label">En cours</span><strong id="readingCount">0</strong></div>
       </div>
+    </div>
 
-      <nav class="nav">
-        <button class="nav-link active" data-view="library">Mes étagères</button>
-        <button class="nav-link" data-view="carousel">Coverflow</button>
-        <button class="nav-link" data-view="settings">Paramètres</button>
-      </nav>
+    <div class="action-stack">
+      <button class="btn btn-primary" id="openAddModal">+ Ajouter un livre</button>
+      <button class="btn btn-secondary" id="exportJson">Exporter JSON</button>
+      <button class="btn btn-ghost" id="openGithubModal">⇡ Publier sur GitHub</button>
+    </div>
+  </aside>
 
-      <div class="panel soft">
-        <label class="field-label" for="searchInput">Recherche</label>
-        <input id="searchInput" class="input" type="search" placeholder="Titre, auteur, genre..." />
+  <!-- ─ MAIN ───────────────────────────────────────────────── -->
+  <main class="main">
+
+    <!-- TOPBAR -->
+    <div class="topbar glass">
+      <h2 class="page-title" id="viewTitle">Mes étagères</h2>
+      <div class="toolbar" id="libraryToolbar">
+        <input class="input" id="searchInput" type="search" placeholder="Rechercher…" style="width:200px;">
+        <select class="input input-select" id="sortSelect">
+          <option value="added-desc">Plus récents</option>
+          <option value="title-asc">Titre A→Z</option>
+          <option value="author-asc">Auteur A→Z</option>
+          <option value="shelf-asc">Étagère</option>
+        </select>
+        <select class="input input-select" id="filterSelect">
+          <option value="all">Tous les statuts</option>
+          <option value="to-read">À lire</option>
+          <option value="reading">En cours</option>
+          <option value="read">Lus</option>
+        </select>
       </div>
+    </div>
 
-      <div class="panel soft stats">
-        <div>
-          <span class="stat-label">Livres</span>
-          <strong id="bookCount">0</strong>
-        </div>
-        <div>
-          <span class="stat-label">Étagères</span>
-          <strong id="shelfCount">0</strong>
-        </div>
-        <div>
-          <span class="stat-label">En cours</span>
-          <strong id="readingCount">0</strong>
-        </div>
-      </div>
+    <!-- LIBRARY VIEW ─ Three.js -->
+    <section class="view active" id="libraryView">
+      <div id="threeWrap">
+        <canvas id="threeCanvas"></canvas>
+        <div id="shelfLabels"></div>
 
-      <div class="panel soft action-stack">
-        <button id="openAddModal" class="btn btn-primary">Ajouter un livre</button>
-        <button id="exportJson" class="btn btn-secondary">Exporter JSON</button>
-        <button id="openGithubModal" class="btn btn-ghost">Synchroniser GitHub</button>
-      </div>
-    </aside>
-
-    <main class="main">
-      <header class="topbar glass">
-        <div>
-          <p class="eyebrow">Collection personnelle</p>
-          <h2 class="page-title">Mes étagères</h2>
-        </div>
-        <div class="toolbar">
-          <select id="sortSelect" class="input input-select">
-            <option value="added-desc">Plus récents</option>
-            <option value="title-asc">Titre A-Z</option>
-            <option value="author-asc">Auteur A-Z</option>
-            <option value="shelf-asc">Étagère</option>
-          </select>
-          <select id="filterSelect" class="input input-select">
-            <option value="all">Tous les statuts</option>
-            <option value="read">Lus</option>
-            <option value="reading">En cours</option>
-            <option value="to-read">À lire</option>
-          </select>
-        </div>
-      </header>
-
-      <section id="libraryView" class="view active">
-        <div id="shelves" class="shelves"></div>
-      </section>
-
-      <section id="carouselView" class="view">
-        <div class="hero-stage glass">
-          <div class="hero-copy">
-            <p class="eyebrow">Sélection immersive</p>
-            <h3 id="carouselTitle">—</h3>
-            <p id="carouselMeta">—</p>
-            <p id="carouselNote" class="muted">Choisissez un livre pour afficher ses détails.</p>
+        <!-- DETAIL SHEET superposée -->
+        <aside class="detail-sheet glass hidden" id="detailSheet" aria-live="polite">
+          <button class="close-btn icon-btn" id="closeDetail" aria-label="Fermer">×</button>
+          <img id="dsCover" src="" alt="" width="280" height="180" loading="lazy">
+          <p class="eyebrow" id="dsStatus"></p>
+          <h3 class="ds-title" id="dsTitle"></h3>
+          <p class="small muted" id="dsMeta"></p>
+          <p style="font-size:14px;margin-top:10px;line-height:1.6;color:var(--muted);font-style:italic;" id="dsNote"></p>
+          <div class="ds-actions">
+            <button class="btn btn-primary" id="dsEdit">Modifier</button>
           </div>
-          <div class="carousel-wrap">
-            <button id="prevCarousel" class="carousel-arrow" aria-label="Précédent">‹</button>
-            <div id="carouselTrack" class="carousel-track"></div>
-            <button id="nextCarousel" class="carousel-arrow" aria-label="Suivant">›</button>
-          </div>
-        </div>
-      </section>
-
-      <section id="settingsView" class="view">
-        <div class="settings-grid">
-          <article class="panel glass prose">
-            <p class="eyebrow">JSON</p>
-            <h3>Source des données</h3>
-            <p>Au chargement, l'application lit <code>books.json</code>. Vous pouvez aussi pousser la base vers un fichier JSON d'un repo GitHub via l'API Contents.</p>
-          </article>
-          <article class="panel glass prose">
-            <p class="eyebrow">Netlify</p>
-            <h3>Déploiement</h3>
-            <p>L'app est 100% statique : ouvrez ce dossier dans Netlify, ou connectez un repo GitHub. Aucun backend n'est requis.</p>
-          </article>
-        </div>
-      </section>
-    </main>
-  </div>
-
-  <dialog id="bookModal" class="modal">
-    <form method="dialog" class="modal-card glass wide" id="bookForm">
-      <div class="modal-head">
-        <div>
-          <p class="eyebrow">Ajouter un livre</p>
-          <h3>Nouveau volume</h3>
-        </div>
-        <button class="icon-btn" value="cancel" aria-label="Fermer">×</button>
+        </aside>
       </div>
+    </section>
+
+    <!-- CAROUSEL VIEW -->
+    <section class="view" id="carouselView">
+      <div class="hero-stage glass">
+        <div class="hero-copy">
+          <p class="eyebrow">Coverflow</p>
+          <h3 id="carouselTitle">—</h3>
+          <p class="muted small" id="carouselMeta"></p>
+          <p style="font-size:15px;margin-top:12px;line-height:1.65;max-width:52ch;font-style:italic;color:var(--muted)" id="carouselNote"></p>
+        </div>
+        <div class="carousel-wrap">
+          <button class="carousel-arrow" id="prevCarousel" aria-label="Précédent">‹</button>
+          <div class="carousel-track" id="carouselTrack" role="list"></div>
+          <button class="carousel-arrow" id="nextCarousel" aria-label="Suivant">›</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- SETTINGS VIEW -->
+    <section class="view" id="settingsView">
+      <div class="settings-grid">
+        <article class="prose glass">
+          <p class="eyebrow">À propos</p>
+          <h3>Biblos</h3>
+          <p>Une bibliothèque personnelle immersive rendue en <strong>Three.js</strong>. Les livres sont disposés sur des étagères en bois 3D avec ombres et matériaux réalistes. Cliquez sur un livre pour voir ses détails.</p>
+        </article>
+        <article class="prose glass">
+          <p class="eyebrow">Données</p>
+          <h3>books.json</h3>
+          <p>Tous vos livres sont stockés dans <code>books.json</code> à la racine du projet. Exportez-le et rechargez la page pour persister. Le bouton <em>Publier sur GitHub</em> le pousse directement via l'API GitHub.</p>
+        </article>
+        <article class="prose glass">
+          <p class="eyebrow">ISBN Lookup</p>
+          <h3>Open Library</h3>
+          <p>Entrez un ISBN-13 dans le formulaire d'ajout et cliquez <em>Chercher</em> pour pré-remplir titre, auteur, genre et couverture depuis Open Library.</p>
+        </article>
+        <article class="prose glass">
+          <p class="eyebrow">Rendu 3D</p>
+          <h3>WebGL / Three.js</h3>
+          <p>Chaque livre est un <code>BoxGeometry</code> avec 6 matériaux distincts — couverture avant, dos, tranche, pages. Les textures sont chargées via le proxy <code>images.weserv.nl</code> pour éviter les erreurs CORS.</p>
+        </article>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ─ MODAL LIVRE ──────────────────────────────────────────── -->
+<dialog class="modal" id="bookModal" aria-modal="true" aria-labelledby="modalFormTitle">
+  <div class="modal-card glass">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">Bibliothèque</p>
+        <h3 id="modalFormTitle">Nouveau volume</h3>
+      </div>
+      <button class="icon-btn" onclick="document.getElementById('bookModal').close()" aria-label="Fermer">×</button>
+    </div>
+    <form id="bookForm" novalidate>
       <div class="modal-grid">
-        <div class="field-row grow">
-          <label class="field-label" for="isbnInput">ISBN</label>
+        <div class="field-row">
+          <label class="field-label" for="isbnInput">ISBN-13</label>
           <div class="inline-field">
-            <input id="isbnInput" class="input" type="text" placeholder="9782070360024" />
-            <button type="button" id="lookupBtn" class="btn btn-secondary">Chercher</button>
+            <input class="input" id="isbnInput" type="text" inputmode="numeric" maxlength="17" placeholder="978-…">
+            <button class="btn btn-secondary" type="button" id="lookupBtn">Chercher</button>
           </div>
         </div>
         <div class="field-row">
-          <label class="field-label" for="titleInput">Titre</label>
-          <input id="titleInput" class="input" type="text" required />
+          <label class="field-label" for="shelfInput">Étagère n°</label>
+          <input class="input" id="shelfInput" type="number" min="1" max="20" value="1">
         </div>
         <div class="field-row">
-          <label class="field-label" for="authorInput">Auteur</label>
-          <input id="authorInput" class="input" type="text" required />
+          <label class="field-label" for="titleInput">Titre *</label>
+          <input class="input" id="titleInput" type="text" required placeholder="L'Étranger">
+        </div>
+        <div class="field-row">
+          <label class="field-label" for="authorInput">Auteur *</label>
+          <input class="input" id="authorInput" type="text" required placeholder="Albert Camus">
         </div>
         <div class="field-row">
           <label class="field-label" for="genreInput">Genre</label>
-          <input id="genreInput" class="input" type="text" placeholder="Roman" />
+          <input class="input" id="genreInput" type="text" placeholder="Roman, Philosophie…">
         </div>
         <div class="field-row">
           <label class="field-label" for="statusInput">Statut</label>
-          <select id="statusInput" class="input input-select">
+          <select class="input input-select" id="statusInput">
             <option value="to-read">À lire</option>
             <option value="reading">En cours</option>
             <option value="read">Lu</option>
           </select>
         </div>
-        <div class="field-row">
-          <label class="field-label" for="shelfInput">Étagère</label>
-          <input id="shelfInput" class="input" type="number" min="1" step="1" value="1" />
+        <div class="field-row field-span-2">
+          <label class="field-label" for="coverInput">URL de couverture</label>
+          <input class="input" id="coverInput" type="url" placeholder="https://covers.openlibrary.org/…">
         </div>
         <div class="field-row field-span-2">
-          <label class="field-label" for="coverInput">Couverture</label>
-          <input id="coverInput" class="input" type="url" placeholder="https://..." />
-        </div>
-        <div class="field-row field-span-2">
-          <label class="field-label" for="noteInput">Note</label>
-          <textarea id="noteInput" class="input textarea" rows="4" placeholder="Quelques mots personnels..."></textarea>
+          <label class="field-label" for="noteInput">Note personnelle</label>
+          <textarea class="input textarea" id="noteInput" placeholder="Votre impression…"></textarea>
         </div>
       </div>
       <div class="modal-actions">
-        <button type="button" id="deleteBookBtn" class="btn btn-ghost hidden">Supprimer</button>
-        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <button class="btn btn-secondary hidden" type="button" id="deleteBookBtn">🗑 Supprimer</button>
+        <button class="btn btn-primary" type="submit">Enregistrer</button>
       </div>
     </form>
-  </dialog>
+  </div>
+</dialog>
 
-  <dialog id="githubModal" class="modal">
-    <form method="dialog" class="modal-card glass" id="githubForm">
-      <div class="modal-head">
-        <div>
-          <p class="eyebrow">Synchronisation</p>
-          <h3>GitHub JSON</h3>
-        </div>
-        <button class="icon-btn" value="cancel" aria-label="Fermer">×</button>
+<!-- ─ MODAL GITHUB ─────────────────────────────────────────── -->
+<dialog class="modal" id="githubModal" aria-modal="true">
+  <div class="modal-card glass">
+    <div class="modal-head">
+      <div>
+        <p class="eyebrow">GitHub</p>
+        <h3>Publier books.json</h3>
       </div>
-      <div class="modal-grid one-col">
-        <div class="field-row"><label class="field-label" for="ghOwner">Owner</label><input id="ghOwner" class="input" placeholder="zabre" /></div>
-        <div class="field-row"><label class="field-label" for="ghRepo">Repo</label><input id="ghRepo" class="input" placeholder="biblos" /></div>
-        <div class="field-row"><label class="field-label" for="ghPath">Chemin JSON</label><input id="ghPath" class="input" placeholder="books.json" value="books.json" /></div>
-        <div class="field-row"><label class="field-label" for="ghBranch">Branche</label><input id="ghBranch" class="input" placeholder="main" value="main" /></div>
-        <div class="field-row"><label class="field-label" for="ghToken">Token GitHub</label><input id="ghToken" class="input" type="password" placeholder="ghp_..." /></div>
-      </div>
-      <div class="modal-actions">
-        <button type="button" id="pushGithub" class="btn btn-primary">Pousser books.json</button>
-      </div>
-    </form>
-  </dialog>
+      <button class="icon-btn" onclick="document.getElementById('githubModal').close()" aria-label="Fermer">×</button>
+    </div>
+    <div class="modal-grid modal-grid one-col" style="gap:12px;">
+      <div class="field-row"><label class="field-label">Owner</label><input class="input" id="ghOwner" placeholder="mon-username"></div>
+      <div class="field-row"><label class="field-label">Repository</label><input class="input" id="ghRepo" placeholder="ma-bibliotheque"></div>
+      <div class="field-row"><label class="field-label">Chemin</label><input class="input" id="ghPath" value="books.json"></div>
+      <div class="field-row"><label class="field-label">Branche</label><input class="input" id="ghBranch" value="main"></div>
+      <div class="field-row"><label class="field-label">Token (PAT)</label><input class="input" id="ghToken" type="password" placeholder="ghp_…"></div>
+    </div>
+    <div class="modal-actions" style="justify-content:flex-end">
+      <button class="btn btn-primary" id="pushGithub">Pousser books.json</button>
+    </div>
+  </div>
+</dialog>
 
-  <template id="bookCardTemplate">
-    <article class="book-card" tabindex="0">
-      <div class="book-spine"></div>
-      <img class="book-cover" alt="" loading="lazy" decoding="async" />
-      <div class="book-meta">
-        <h4 class="book-title"></h4>
-        <p class="book-author"></p>
-      </div>
-    </article>
-  </template>
-
-  <script src="./assets/app.js" defer></script>
+<script type="module" src="./assets/app.js"></script>
 </body>
 </html>
